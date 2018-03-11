@@ -1,0 +1,6 @@
+!--------Writing Math function-------
+Void main(string[])
+int a=10;
+int b=10;
+int c=a+b;
+
