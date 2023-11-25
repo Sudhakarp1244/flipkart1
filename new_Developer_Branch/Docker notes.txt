@@ -1,0 +1,445 @@
+Docker
+
+Image vs Container
+============================----------------------------
+Image: is a package or template is used to create one or more containers
+
+Container: are running instances of images
+
+ex: to run instance of an ansible using below command:
+docker run ansible --> will run one instance of ansible
+==========================================================================
+Docker Editions:
+1) Community Editions : set of free docker products, this edition available in linux mac and windows
+2) Enterprise Editions : certified and supported containers comes with enterprise addons image management andsecurity.
+================================================================================================
+Docker Installation:
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+==============================================================================================
+Commands:
+
+docker run --> command is used to pull image and run a container from image and then exited
+ex: docker run nginx : will run container from Nginx image if it is present locally to the host, 
+if not it will pull from docker hub
+--------------------------------------------------------------------------------------------------------------------
+docker ps command : to list all containers
+
+docker ps
+O/P:
+ContainerID  Image Command Created timestamp Status Ports Name
+---------------------------------------------------------------------------
+docker ps -a : to list all containers which are running and also previously stopped
+--------------------------------------------------------------------
+To stop a container:
+docker stop contianername/containerID
+ex: docker stop 'nameofcontainer is shown when docker ps command issue"
+------------------------------------------------------------------------
+To remove exited container or stopped contaianer
+
+docker rm 'exited container naame'
+
+Ex: docker rm container1
+--------------------------------------------------------------
+To list all available images:
+docker images --> it will list all available images and size of the images.
+
+To Remove images:
+docker rmi image-name
+
+Ex: docker rmi nginx 
+
+Note: before removing the images, we need to make sure no containers running in it.
+--------------------------------------------------------------------------------------------
+docker pull images -- to pull only images not to run a container from an image
+
+Ex:
+docker pull nginx -- it will pull nginx image
+
+docker run nginx --> it will pull image:nginx and run the container from it and then go to exited state
+----------------------------------------------------------------------------------------
+docker run nginx sleep 5 --> it will run the container from nginx image and goes to sleep state after 5 sec.
+---------------------------------------------------------------------------------------
+Exec : execute a command on a running container
+
+docker exec "containename" command
+
+Ex: docker exec continer1 cat /etc/hosts
+---------------------------------------------------------------
+Attach and detach mode of container:
+docker run containe-name --> it will run container and you can't perform untill it get completed.
+docker run -d container-name --> it will run container in background and exit from that state. it will be completely reunning in the background. also we have a space to run more commands with this detach mode.
+
+Note: if you want to attach a container later point of time, use below command;
+docker attach containerID(first few letters of containerID)
+ex: docker attach a043dcontainer1
+-----------------------------------------------------------------------------------------
+docker run -it image bash -- it will run cotainer and take you to inside of the container
+
+==========================================================================================
+Run a container with the nginx:1.14-alpine image and name it webapp
+docker run -d --name your_name -it docker_image_already_created sh  -->detach mode
+===========================================================================================
+TO remove stopped container,
+
+docker rm stopped-ContainerID.
+
+untill you remove the containers(running or stopped containers), you cant delete the baase images of that particuar containers.
+=====================================================================================================================================
+Tagging:
+docker run image:tag --> to run specific version of image by tagging version to that image
+
+Ex : docker run nginx redis
+o/p : redis version 4.0
+
+if we want to tag a new version:5.0 to the image.
+docker run nginx:5.1.2
+-------------------------------------------------
+Interactive Mode:
+
+By default, docker will not support interactive mode to give input to the commands.
+We need to enable interactive mode by passing -i parameter if docker needs to interact with us to take input vaalues
+
+Ex: docker run -i image:nginx
+Sudhakar (waiting to input sudahakr)
+
+o/p: Sudhakar
+
+doccker run -it imaage:nginx
+Welcome sudhakar for :input the vaalues : Docker learning
+o/p: Welcome sudhaakar for Docker learning
+-----------------------------------------------------------
+Port Mapping:
+
+docker run -p 80:5550 images
+you can maap n numbr of port for the same application in a particular host
+you can't map same port's for the second time in the same host
+ex: docker run -p 80:5550 images/webapp
+docker run -p 80:5550 images/webapp---> errored out sying deamon driver filed
+docker run -p 1214:5550 images/webapp --> it will run on port 5550 and also route the reuest from 1212 to 5550
+---------------------------------------------------------------------------------------
+docker run -v : mount a volume of a container to external driver
+
+Ex1 : docker run -v /opt/data/:/var/lib/mysql mysql
+mysql : is container
+/var/lib/mysql --> sql container volume
+/opt/data --? external mount to store the real sql container data to external drive.
+
+this way we can save the data to external mounts while deleting or stopping the containers
+
+when we remove container we lost entire data of the specific container, so to protect that,
+we need to map the container /volume mount to external /opt mount.
+
+Ex2 : 
+docker run nginx
+nginx running with container under /opt/IBM-->
+
+if we want to save or store our data safely to external drive under /root/data, 
+we need to tag this /root volume for nginx container volume 
+-->
+Ex: docker run -v /root/data:/opt/IBM/
+Command:
+docker run -v /opt/data:/var/lib/mysql -d --name mysql-db -e MYSQL_ROOT_PASSWORD=db_pass123 mysql
+external data: /opt/data
+original volume: /var/lib/mysql
+-----------------------------------------------------------------------------------------------------
+Inspect container:
+
+docker inspect container-name
+
+ex: docker inspect container1
+o/p : {
+		{
+		
+			"ID" : "3567"
+			"Name": container1
+			"Path": "/opt/IBM"
+			}
+			"Mounts" : /root/data
+			
+		}
+	}
+--------------------------------------------------------------------
+docker logs container
+------------------------------------------------------------------
+Run an instance of nginx/simple-webapp with a tag blue and map port 8080 on the container to 38282 on the host.
+docker run -itd -p 38282:8080 nginx/simple-webapp:blue
+
+host port should be first and then follwed by container port.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+create a own image from a docker file
+
+docker build . -f filename -t username/dockerimage-name
+Ex: docker build . -f DockerFile -t sudhakar/nginx-customimage
+---------------------------------------------------------------------------------------------------------------------------------------------------
+docker build . -f DockerFile -t sudhakar/Nginx -- build your own image from file.
+docker build . -t useraccount/simple-webappimage -- tag image to your account repository by passing -t and then push images to docker hub
+docker push sudhakar/Nginx -->push image to public docker hub
+----------------------------------------------------------------------------------------------------------------------------------------------------
+Defining environment varaibles : -e;
+
+docker run -e APP_color=blue image;
+
+you can inspect docker container and go to config section to see what environment variables are defined.
+docker inspect container-ID
+EX: 
+config:{
+		"ENV": 
+		[
+		"APP_Color =blue",
+		"LANG=C.UFT-8",
+		"Python_Versison=:3.6.6",
+		]
+}
+--------------------------------------------------------------------------------------------------------------------------------------------------------	
+Run a container named blue-app using image kodekloud/simple-webapp and set the environment variable APP_COLOR to blue. 
+Make the application available on port 38282 on the host. The application listens on port 8080		
+
+Ex command: docker run -d -e APP_COLOR=blue -p 38282:8080 --name blue-app kodekloud/simple-webapp
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Deploy a mysql database using the mysql image and name it mysql-db.
+Set the database password to use db_pass123. Lookup the mysql image on Docker Hub and identify the correct environment variable to use for setting the root password.
+
+Command : docker run -d -e MYSQL_ROOT_PASSWORD=db_pass123 --name=mysql-db mysql
+
+Image Name: mysql-db
+image Name: mysql
+MYSQL_Root_Password : db_pass123
+environment Varaible : MYSQL_ROOT_PASSWORD
+=========================================================================================================================================================================
+docker run --entrypoint sleep2.0  ubntu-sleeper 10
+Ex: 
+FROM debian:wheezy
+ENTRYPOINT ["/bin/ping"]
+CMD ["localhost"]
+----------------------------------------------------------------------------------------------------
+--links: to link 2 containers together means if one container is dependent on another container to run, we use links
+
+docker run -d --name=redis redis
+docker run -d --name=db psotgres
+docker run -d --name=vote -p 5001:80 voting-app
+docker run -d --name=result -p 5002:80 result-app
+docker run -d -name=worker worker
+
+
+docker run -d --name=alpine-2 --network=none alpine --> to attach a network to alphine container
+
+docker network create -d overlay --subnet=182.18.0.1/24 --gateway 182.18.0.1 --name=wp-mysql-network bridge
+Gateway 182.18.0.1
+
+if we want to link postgres DB and webapp:voting app together we can define like as below
+docker run -d --name=vote -p port:port --link namofDBcontainer:DBimage Secondcontainer
+Ex: docker run -d --name=vote -p 5001:80 --link db:postgres voting-app
+
+==========================================================================================================================
+from above basic commands, we can compose docker yaml file called Compose.yaml file
+version:1
+
+redis:
+	image:redis
+	
+db:
+	imaage:postgres
+
+vote:
+	image:voting-app
+	ports:
+		-5001:80
+	links:redis
+
+result:
+	image:result-app
+	ports:
+		-5002:80
+	links:db
+
+worker:
+	image:worker
+	links:
+		-redis
+		-db
+=====================================================================================================
+Version:2 (now we need to define dependenccy of voting app on redis first to run and then followed by voting app)
+	Services:
+		redis:
+			image:redis
+	
+		db:
+			image:postgres
+
+		vote:
+			image:voting-app
+			ports:
+				-5001:80
+			depends on:redis
+
+		result:
+			image:result-app
+			ports:
+				-5002:80
+			links:db
+
+		worker:
+			image:worker
+			links:
+				-redis
+				-db
+===============================================================================================================================
+Version: 3
+
+	Services:
+		redis:
+			image:redis
+	
+		db:
+			image:postgres
+			networks:
+				-backend
+
+		vote:
+			image:voting-app
+			ports:
+				-5001:80
+			depends on:redis
+			networks:
+				-frontend
+				-backend
+
+		result:
+			image:result-app
+			ports:
+				-5002:80
+			
+
+		worker:
+			image:worker
+			networks:
+				-backend
+			
+	Networks:
+		frontend:
+		backend: 
+=========================================================================================================================================
+docker compose:
+
+You can run a file using docker compose command and make it run all the containers in a single command where the docker-compose file is created.
+
+Command: docker-compose up
+
+
+it will run composse.yaml file
+----------------------------------------------------------------------------------------------------------------------------
+docker registry
+
+default registory where we pull andd push the images is docker.io registry
+and then follwed by usename/useraccount/ and followed by image name : simple-webappimage
+
+Ex: docker.io/nginx/nginx
+
+docker.io : stands for default docker registry
+nginx represnts the user aaccount
+2nd Nginx represents the image-name
+----------------------------------------------------------------------
+Private registry:
+
+docker login private-registry-name.io
+enter user name:xxxxxxxx
+enter password :xxxxxxxx
+Login succeded
+
+docker run private-registry.io/apps/internal-app
+
+docker run -d -p 5000:5000 -name registry registry:2
+
+dcoker image tag my-image localhost:5000/my-image
+
+docker push localhost:5000/my-image
+
+docker pull localhost:5000/my-image
+
+docker pull 192.168.56.100:5000/my-image
+==================================================================================================================================
+
+by default docker compose will not be installed when docker is getting installed, you need install by following Docker office site.
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+===========================================================================================================================================
+Let practice deploying a registry server on our own.
+Run a registry server with name equals to my-registry using registry:2 image with host port set to 5000, and restart policy set to always.
+
+Note: Registry server is exposed on port 5000 in the image.
+
+
+Here we are hosting our own registry using the open source Docker Registry.
+
+Command:
+docker run -d --restart=always -p 5000:5000 --name=my-registry registry:2
+
+
+docker image tag registry:2 localhost:5000/registry
+==============================================================================================================================================
+docker commit container_ID repositoryname:tag
+
+Ex: docker commit aedfc sudhakar_nginx:v1
+=============================================================================================================================
+Docker Engine
+=======================================================================================================================================================
+dockerCLI
+RSTAPI
+Dcoker Deamon
+
+are 3 components together called as Docker Engine.
+
+Docker CLI need not to be on same host; DOCKer cli also present on other laptop or Host.
+
+To run docker commands on remote host from local desktop or Docker CLI setup host:
+docker -H=remote-docker-engine:2375
+docker -H=10.123.2.1:2375 run nginx
+----------------------------------------------------------------------
+Restrict cgroups on container like Memory and cpu not to exceed certain amount of memory and CPU
+
+docker run --cpus=.5 ubuntu -->it will not 
+docker run --memory=100m ubuntu --> it will not allocate memory more than 100MB
+--------------------------------------------------------------------------
+To run some command inside container
+docker exec container-name command
+Ex: docker exec adefi1 ps-eaf
+==========================================================================
+Docker storage:
+--------------------------------
+File system:
+	--> default file system /var/lib/docker
+							-->aufs
+							-->containers
+							-->image
+							-->volumes
+							
+To create a volumes:
+docker volume create data_volume
+
+-->/var/lib/docker
+	-->volumes
+	----> data_volume
+	
+we can mount data_volume to container volume to keep our data safe even though container gets deleted.
+
+
+docker run -v data_volume:/var/lib/docker mysql
+docker run -v data_volume2:/var/lib/docker mysql -- we can map second volume with same data of /var/lib/directory mount.
+=================================================
+Mounts are of 2 types
+1)volume mount and 
+2)Bind Mount
+----------------------------------------
+docker system df --> will display all the space utilization on images, volumes and containers etc;;;;
+
+
+
+
+ 
+
+
+
+
+
